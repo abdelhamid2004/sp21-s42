@@ -17,6 +17,7 @@ public class Model extends Observable {
     /** True iff game is ended. */
     private boolean gameOver;
 
+
     /* Coordinate System: column C, row R of the board (where row 0,
      * column 0 is the lower-left corner of the board) will correspond
      * to board.tile(c, r).  Be careful! It works like (x, y) coordinates.
@@ -109,16 +110,53 @@ public class Model extends Observable {
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
+        board.setViewingPerspective(side);
+        for (int c = 0 ; c < board.size() ; c += 1)
+        {
+            int target = board.size() - 1;
+            while (target >= 1) {
+                int idx = target - 1;
+                while (idx >= 0 && board.tile(c, idx) == null) idx--;
+                if (idx >= 0) { // U found tile to move
 
-        // TODO: Modify this.board (and perhaps this.score) to account
-        // for the tilt to the Side SIDE. If the board changed, set the
-        // changed local variable to true.
+                    if(board.tile(c, target) == null)
+                    {
+                        Tile t = board.tile(c, idx);
+                        board.move(c, target, t);
+                        changed = true;
+                    }
+                    else if (board.tile(c, target).value() == board.tile(c, idx).value()) {
+                        Tile t = board.tile(c, idx);
+                        board.move(c, target, t);
+                        score += board.tile(c , target).value();
+                        changed = true;
+                        target--;
+                    } else {
+                        target--;
+                        Tile t = board.tile(c, idx);
+                        changed = true;
+                        board.move(c, target, t);
+                    }
+
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+
+
 
         checkGameOver();
         if (changed) {
             setChanged();
         }
+        board.setViewingPerspective(Side.NORTH);
         return changed;
+
+
     }
 
     /** Checks if the game is over and sets the gameOver variable
@@ -137,7 +175,13 @@ public class Model extends Observable {
      *  Empty spaces are stored as null.
      * */
     public static boolean emptySpaceExists(Board b) {
-        // TODO: Fill in this function.
+        for (int i = 0; i < b.size(); i++) {
+            for (int j = 0; j < b.size(); j++) {
+                if (b.tile(i, j) == null) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -147,7 +191,19 @@ public class Model extends Observable {
      * given a Tile object t, we get its value with t.value().
      */
     public static boolean maxTileExists(Board b) {
-        // TODO: Fill in this function.
+        for(int i = 0 ;i < b.size(); i++)
+        {
+            for(int j = 0; j < b.size(); j++)
+            {
+                if (b.tile(i,j) == null){
+                    continue;
+                }
+                if(b.tile(i,j).value() == MAX_PIECE)
+                {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -158,7 +214,24 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
-        // TODO: Fill in this function.
+        if(emptySpaceExists(b)){
+            return true;
+        }
+        for(int i = 0; i < 4; i++)
+        {
+            for(int j = 0; j < 4; j++)
+            {
+                int x = b.tile(i, j).value();
+                if((i > 0 && b.tile(i-1,j).value() == x ) || (i != 3 && b.tile(i + 1,j).value() == x ))
+                {
+                    return true;
+                }
+                if((j > 0 && b.tile(i,j-1).value() == x ) || (j != 3 && b.tile(i,j+1).value() == x ) )
+                {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 

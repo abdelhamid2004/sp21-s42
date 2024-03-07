@@ -61,7 +61,6 @@ public class Board implements Iterable<Tile> {
     private Tile vtile(int col, int row, Side side) {
         return values[side.col(col, row, size())][side.row(col, row, size())];
     }
-
     /** Return the current Tile at (COL, ROW), where 0 <= ROW < size(),
      *  0 <= COL < size(). Returns null if there is no tile there. */
     public Tile tile(int col, int row) {
